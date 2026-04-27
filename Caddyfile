@@ -1,0 +1,27 @@
+# Замените на свой домен после привязки к серверу
+# admin@example.ru — для писем от Let's Encrypt о сроках сертификата
+
+{
+    email admin@example.ru
+}
+
+vostok.example.ru, www.vostok.example.ru {
+    encode gzip zstd
+    reverse_proxy app:3000
+
+    # Безопасность
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # Логирование
+    log {
+        output file /data/access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}

@@ -1,0 +1,14 @@
+# Environment variables
+.env*.local
+
+# Common ignores
+node_modules
+.next/
+.DS_Store
+.vercel
+data/
+
+# Local backups / IDE
+vercel копия/
+.claude/
+*.v0
