@@ -112,8 +112,11 @@ export async function POST(request: Request) {
   const text = lines.join("\n")
 
   // Уведомление в Telegram — fire-and-forget. На российских IP api.telegram.org
-  // блокируется, поэтому не ждём ответа: бронь уже в БД, юзер получит 200 сразу.
+  // блокируется, поэтому шлём через TELEGRAM_API_BASE_URL (Cloudflare Worker).
+  // Не ждём ответа: бронь уже в БД, юзер получит 200 сразу.
   const tgEndpoint = process.env.TELEGRAM_API_BASE_URL ?? "https://api.telegram.org"
+  const ctrl = new AbortController()
+  const abortTimer = setTimeout(() => ctrl.abort(), 8000)
   void fetch(`${tgEndpoint}/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -123,10 +126,15 @@ export async function POST(request: Request) {
       parse_mode: "HTML",
       disable_web_page_preview: true,
     }),
-    signal: AbortSignal.timeout(5000),
-  }).catch((err) => {
-    console.error("Telegram notification failed (booking still saved):", err)
+    signal: ctrl.signal,
   })
+    .then(async (res) => {
+      if (!res.ok) console.error("Telegram API:", res.status, await res.text())
+    })
+    .catch((err) => {
+      console.error("Telegram notification failed (booking still saved):", err)
+    })
+    .finally(() => clearTimeout(abortTimer))
 
   return NextResponse.json({ ok: true, savedId })
 }
