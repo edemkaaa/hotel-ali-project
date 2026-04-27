@@ -1,11 +1,11 @@
-# Замените на свой домен после привязки к серверу
-# admin@example.ru — для писем от Let's Encrypt о сроках сертификата
+# Caddy reverse proxy for vostok guesthouse
+# Email below — для писем от Let's Encrypt о сроках сертификата
 
 {
-    email admin@example.ru
+    email saretsdkfhs@gmail.com
 }
 
-vostok.example.ru, www.vostok.example.ru {
+gostevoydomvostok.ru, www.gostevoydomvostok.ru {
     encode gzip zstd
     reverse_proxy app:3000
 
