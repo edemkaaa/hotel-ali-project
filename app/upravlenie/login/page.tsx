@@ -10,7 +10,7 @@ import { Lock } from "lucide-react"
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const from = searchParams.get("from") || "/admin"
+  const from = searchParams.get("from") || "/upravlenie"
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -20,7 +20,7 @@ function LoginForm() {
     setError(null)
     setLoading(true)
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch("/api/upravlenie/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),

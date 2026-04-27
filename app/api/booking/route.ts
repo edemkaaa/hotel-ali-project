@@ -77,7 +77,7 @@ export async function POST(request: Request) {
   }
 
   const adminUrl = process.env.ADMIN_BASE_URL
-  const adminLink = savedId && adminUrl ? `${adminUrl.replace(/\/$/, "")}/admin#booking-${savedId}` : null
+  const adminLink = savedId && adminUrl ? `${adminUrl.replace(/\/$/, "")}/upravlenie#booking-${savedId}` : null
   const prices = await getRoomPrices()
   const pricing = calculateBooking(room!, checkin!, checkout!, prices[room!])
   const nightsLabel = (n: number) => {

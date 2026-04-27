@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /upravlenie
+Disallow: /api/
+
+Sitemap: https://gostevoydomvostok.ru/sitemap.xml

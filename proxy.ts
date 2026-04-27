@@ -6,12 +6,12 @@ const ADMIN_COOKIE_NAME = "vostok_admin"
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (!pathname.startsWith("/admin") && !pathname.startsWith("/api/admin")) {
+  if (!pathname.startsWith("/upravlenie") && !pathname.startsWith("/api/upravlenie")) {
     return NextResponse.next()
   }
 
-  const isLoginPage = pathname === "/admin/login"
-  const isLoginApi = pathname === "/api/admin/login"
+  const isLoginPage = pathname === "/upravlenie/login"
+  const isLoginApi = pathname === "/api/upravlenie/login"
   if (isLoginPage || isLoginApi) {
     return NextResponse.next()
   }
@@ -19,15 +19,15 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value
   if (token) return NextResponse.next()
 
-  if (pathname.startsWith("/api/admin")) {
+  if (pathname.startsWith("/api/upravlenie")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const url = request.nextUrl.clone()
-  url.pathname = "/admin/login"
+  url.pathname = "/upravlenie/login"
   url.searchParams.set("from", pathname)
   return NextResponse.redirect(url)
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/upravlenie/:path*", "/api/upravlenie/:path*"],
 }

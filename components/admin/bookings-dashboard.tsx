@@ -104,7 +104,7 @@ export function BookingsDashboard() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/bookings`, { cache: "no-store" })
+      const res = await fetch(`/api/upravlenie/bookings`, { cache: "no-store" })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setBookings(data.bookings ?? [])
@@ -166,7 +166,7 @@ export function BookingsDashboard() {
   }, [bookings, statusFilter, search])
 
   async function updateBooking(id: number, patch: Partial<Pick<Booking, "status" | "notes">>) {
-    const res = await fetch(`/api/admin/bookings/${id}`, {
+    const res = await fetch(`/api/upravlenie/bookings/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -181,7 +181,7 @@ export function BookingsDashboard() {
 
   async function deleteBooking(id: number) {
     if (!confirm("Удалить заявку безвозвратно?")) return
-    const res = await fetch(`/api/admin/bookings/${id}`, { method: "DELETE" })
+    const res = await fetch(`/api/upravlenie/bookings/${id}`, { method: "DELETE" })
     if (!res.ok) {
       alert("Не удалось удалить")
       return
@@ -190,8 +190,8 @@ export function BookingsDashboard() {
   }
 
   async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" })
-    window.location.href = "/admin/login"
+    await fetch("/api/upravlenie/logout", { method: "POST" })
+    window.location.href = "/upravlenie/login"
   }
 
   const counts = useMemo(() => {
@@ -220,7 +220,7 @@ export function BookingsDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <a
-              href="/api/admin/bookings/export"
+              href="/api/upravlenie/bookings/export"
               className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition"
             >
               <Download className="h-4 w-4" /> CSV

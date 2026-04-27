@@ -26,7 +26,7 @@ export function PricesEditor() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch("/api/admin/prices", { cache: "no-store" })
+      const res = await fetch("/api/upravlenie/prices", { cache: "no-store" })
       if (!res.ok) throw new Error("Не удалось загрузить цены")
       const data = await res.json()
       setItems(data.prices)
@@ -56,7 +56,7 @@ export function PricesEditor() {
         const v = Number(drafts[item.slug])
         if (Number.isFinite(v) && v !== item.price) payload[item.slug] = v
       }
-      const res = await fetch("/api/admin/prices", {
+      const res = await fetch("/api/upravlenie/prices", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prices: payload }),
