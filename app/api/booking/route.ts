@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { db, schema } from "@/lib/db"
 import { calculateBooking, formatRub } from "@/lib/rooms"
 import { getRoomPrices } from "@/lib/prices"
+import { sendBookingEmail } from "@/lib/mailer"
 
 type BookingPayload = {
   name?: string
@@ -68,14 +69,6 @@ export async function POST(request: Request) {
     console.error("Failed to save booking to DB:", err)
   }
 
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
-
-  if (!token || !chatId) {
-    console.warn("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set — заявка сохранена в БД, но не отправлена в Telegram")
-    return NextResponse.json({ ok: true, savedId })
-  }
-
   const adminUrl = process.env.ADMIN_BASE_URL
   const adminLink = savedId && adminUrl ? `${adminUrl.replace(/\/$/, "")}/upravlenie#booking-${savedId}` : null
   const prices = await getRoomPrices()
@@ -86,6 +79,35 @@ export async function POST(request: Request) {
     if (mod10 === 1 && mod100 !== 11) return "ночь"
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return "ночи"
     return "ночей"
+  }
+
+  // Email — fire-and-forget. Если SMTP не настроен, mailer тихо вернёт.
+  void sendBookingEmail({
+    name: name!,
+    phone: phone!,
+    email: email || null,
+    room: room!,
+    roomLabel: ROOM_LABELS[room!] ?? room!,
+    guests: guests!,
+    checkin: checkin!,
+    checkout: checkout!,
+    checkinLabel: formatDate(checkin),
+    checkoutLabel: formatDate(checkout),
+    message: message || null,
+    pricePerNight: pricing.pricePerNight,
+    nights: pricing.nights,
+    total: pricing.total,
+    bookingId: savedId,
+    adminLink,
+  }).catch((err) => {
+    console.error("Email notification failed (booking still saved):", err)
+  })
+
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  const chatId = process.env.TELEGRAM_CHAT_ID
+
+  if (!token || !chatId) {
+    return NextResponse.json({ ok: true, savedId })
   }
 
   const lines = [
