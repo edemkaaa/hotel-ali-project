@@ -81,8 +81,7 @@ export async function POST(request: Request) {
     return "ночей"
   }
 
-  // Email — fire-and-forget. Если SMTP не настроен, mailer тихо вернёт.
-  void sendBookingEmail({
+  const emailPromise = sendBookingEmail({
     name: name!,
     phone: phone!,
     email: email || null,
@@ -107,6 +106,7 @@ export async function POST(request: Request) {
   const chatId = process.env.TELEGRAM_CHAT_ID
 
   if (!token || !chatId) {
+    await emailPromise
     return NextResponse.json({ ok: true, savedId })
   }
 
@@ -133,13 +133,12 @@ export async function POST(request: Request) {
 
   const text = lines.join("\n")
 
-  // Уведомление в Telegram — fire-and-forget. На российских IP api.telegram.org
-  // блокируется, поэтому шлём через TELEGRAM_API_BASE_URL (Cloudflare Worker).
-  // Не ждём ответа: бронь уже в БД, юзер получит 200 сразу.
+  // Уведомление в Telegram. На российских IP api.telegram.org блокируется,
+  // поэтому шлём через TELEGRAM_API_BASE_URL (Cloudflare Worker).
   const tgEndpoint = process.env.TELEGRAM_API_BASE_URL ?? "https://api.telegram.org"
   const ctrl = new AbortController()
   const abortTimer = setTimeout(() => ctrl.abort(), 8000)
-  void fetch(`${tgEndpoint}/bot${token}/sendMessage`, {
+  const tgPromise = fetch(`${tgEndpoint}/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -157,6 +156,10 @@ export async function POST(request: Request) {
       console.error("Telegram notification failed (booking still saved):", err)
     })
     .finally(() => clearTimeout(abortTimer))
+
+  // Дожидаемся обоих уведомлений до возврата ответа: в Next.js detached promises
+  // могут быть обрезаны после возврата. Email и TG идут параллельно.
+  await Promise.allSettled([emailPromise, tgPromise])
 
   return NextResponse.json({ ok: true, savedId })
 }
