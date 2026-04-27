@@ -15,7 +15,6 @@ export function Hero() {
           fill
           className="object-cover"
           priority
-          quality={90}
           style={{ filter: "saturate(1.45) contrast(1.08)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/35 to-black/45" />
