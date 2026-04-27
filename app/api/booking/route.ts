@@ -111,8 +111,12 @@ export async function POST(request: Request) {
 
   const text = lines.join("\n")
 
+  // Уведомление в Telegram — best-effort. Если api.telegram.org недоступен
+  // (например, из российских IP без VPN), заявка всё равно сохранена в БД
+  // и видна в админке, поэтому возвращаем 200.
+  const tgEndpoint = process.env.TELEGRAM_API_BASE_URL ?? "https://api.telegram.org"
   try {
-    const tgResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const tgResponse = await fetch(`${tgEndpoint}/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -121,24 +125,17 @@ export async function POST(request: Request) {
         parse_mode: "HTML",
         disable_web_page_preview: true,
       }),
+      signal: AbortSignal.timeout(5000),
     })
 
     if (!tgResponse.ok) {
       const errorBody = await tgResponse.text()
       console.error("Telegram API error:", tgResponse.status, errorBody)
-      return NextResponse.json(
-        { error: "Не удалось отправить заявку. Позвоните нам, пожалуйста." },
-        { status: 502 }
-      )
     }
-
-    return NextResponse.json({ ok: true })
   } catch (err) {
-    console.error("Booking submit failed:", err)
-    return NextResponse.json(
-      { error: "Не удалось отправить заявку. Позвоните нам, пожалуйста." },
-      { status: 500 }
-    )
+    console.error("Telegram notification failed (booking still saved):", err)
   }
+
+  return NextResponse.json({ ok: true, savedId })
 }
 
