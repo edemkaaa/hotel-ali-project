@@ -14,7 +14,8 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build
+# data/ нужна на этапе билда: lib/db/index.ts открывает SQLite через top-level await при импорте
+RUN mkdir -p /app/data && pnpm build
 
 # ── Runtime ─────────────────────────────────────────────────
 FROM node:20-bookworm-slim AS runner
