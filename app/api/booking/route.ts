@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { db, schema } from "@/lib/db"
 import { calculateBooking, formatRub } from "@/lib/rooms"
 import { getRoomPrices } from "@/lib/prices"
-import { sendBookingEmail } from "@/lib/mailer"
+// SMTP отключён: Timeweb блокирует исходящие порты 25/465/587. Email будет
+// добавлен через HTTP-API (Resend и т.п.) отдельно.
 
 type BookingPayload = {
   name?: string
@@ -81,32 +82,10 @@ export async function POST(request: Request) {
     return "ночей"
   }
 
-  const emailPromise = sendBookingEmail({
-    name: name!,
-    phone: phone!,
-    email: email || null,
-    room: room!,
-    roomLabel: ROOM_LABELS[room!] ?? room!,
-    guests: guests!,
-    checkin: checkin!,
-    checkout: checkout!,
-    checkinLabel: formatDate(checkin),
-    checkoutLabel: formatDate(checkout),
-    message: message || null,
-    pricePerNight: pricing.pricePerNight,
-    nights: pricing.nights,
-    total: pricing.total,
-    bookingId: savedId,
-    adminLink,
-  }).catch((err) => {
-    console.error("Email notification failed (booking still saved):", err)
-  })
-
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_CHAT_ID
 
   if (!token || !chatId) {
-    await emailPromise
     return NextResponse.json({ ok: true, savedId })
   }
 
@@ -157,9 +136,9 @@ export async function POST(request: Request) {
     })
     .finally(() => clearTimeout(abortTimer))
 
-  // Дожидаемся обоих уведомлений до возврата ответа: в Next.js detached promises
-  // могут быть обрезаны после возврата. Email и TG идут параллельно.
-  await Promise.allSettled([emailPromise, tgPromise])
+  // Дожидаемся отправки до возврата ответа: в Next.js detached promises
+  // могут быть обрезаны после return.
+  await tgPromise
 
   return NextResponse.json({ ok: true, savedId })
 }
