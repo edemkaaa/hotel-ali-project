@@ -24,9 +24,11 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      const y = window.scrollY || document.documentElement.scrollTop || 0
+      setIsScrolled(y > 50)
     }
-    window.addEventListener("scroll", handleScroll)
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -93,13 +95,13 @@ export function Header() {
               <TelegramIcon className="h-4 w-4" />
             </a>
             <a
-              href="tel:+79788898921"
+              href="tel:+79788898929"
               className={`hidden xl:flex items-center gap-2 text-sm font-medium transition-colors duration-300 ml-1 ${
                 showSolid ? "text-primary" : "text-white"
               }`}
             >
               <Phone className="h-4 w-4" />
-              <span>+7 (978) 889-89-21</span>
+              <span>+7 (978) 889-89-29</span>
             </a>
           </div>
           
@@ -141,11 +143,11 @@ export function Header() {
               </a>
             ))}
             <a 
-              href="tel:+79788898921" 
+              href="tel:+79788898929" 
               className="flex items-center gap-2 text-primary font-medium py-2"
             >
               <Phone className="h-5 w-5" />
-              <span>+7 (978) 889-89-21</span>
+              <span>+7 (978) 889-89-29</span>
             </a>
             <Button asChild className="mt-2 rounded-full">
               <a href={isHome ? "#booking" : "/#booking"} onClick={() => setIsMobileMenuOpen(false)}>Забронировать</a>

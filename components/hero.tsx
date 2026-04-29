@@ -58,7 +58,7 @@ export function Hero() {
           </div>
           <div className="flex items-center gap-2 text-white/90">
             <Sun className="h-5 w-5 text-accent" />
-            <span className="text-sm md:text-base">29 номеров</span>
+            <span className="text-sm md:text-base">21 номер</span>
           </div>
           <div className="flex items-center gap-2 text-white/90">
             <MapPin className="h-5 w-5 text-accent" />

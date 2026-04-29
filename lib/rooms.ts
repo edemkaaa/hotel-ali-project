@@ -34,7 +34,7 @@ export const rooms: Room[] = [
     guests: 2,
     size: 15,
     floors: "2-4",
-    totalRooms: 19,
+    totalRooms: 8,
     bathroom: "Санузел + душ",
     amenities: ["Кондиционер", "Телевизор", "Wi-Fi", "Холодильник", "Балкон"],
   },
@@ -57,7 +57,7 @@ export const rooms: Room[] = [
     guests: 3,
     size: 17,
     floors: "2-4",
-    totalRooms: 8,
+    totalRooms: 7,
     bathroom: "Санузел + душ",
     amenities: [
       "Кондиционер",
@@ -88,7 +88,7 @@ export const rooms: Room[] = [
     guests: 4,
     size: 19,
     floors: "2-4",
-    totalRooms: 2,
+    totalRooms: 6,
     bathroom: "Санузел + душ",
     amenities: [
       "Кондиционер",
